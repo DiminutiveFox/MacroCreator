@@ -1,0 +1,11 @@
+import pandas as pd
+import macro_builder
+import pyautogui
+pyautogui.PAUSE = 0.1
+
+obj_list = pd.read_csv('coords.csv', index_col=False).loc[:,'CoordX':'CoordY'].transpose().values.T.tolist()
+print(obj_list)
+for n in range(0,10):
+    macro_builder.macro_reader(macro_database='macro.csv', key_dictionary='key_dictionary.csv')
+    for object in obj_list:
+        macro_builder.macro_reader('macro.csv', 'key_dictionary.csv', *object)

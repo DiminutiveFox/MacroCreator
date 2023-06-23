@@ -1,0 +1,27 @@
+,Ctrl,Special Key,Key
+0,ctrl,\x11,q
+1,ctrl,\x17,w
+2,ctrl,\x05,e
+3,ctrl,\x12,r
+4,ctrl,\x14,t
+5,ctrl,\x19,y
+6,ctrl,\x15,u
+7,ctrl,\t,i
+8,ctrl,\x0f,o
+9,ctrl,\x10,p
+10,ctrl,\x01,a
+11,ctrl,\x13,s
+12,ctrl,\x04,d
+13,ctrl,\x06,f
+14,ctrl,\x07,g
+15,ctrl,\x08,h
+16,ctrl,\n,j
+17,ctrl,\x0b,k
+18,ctrl,\x0c,l
+19,ctrl,\x1a,z
+20,ctrl,\x18,x
+21,ctrl,\x03,c
+22,ctrl,\x16,v
+23,ctrl,\x02,b
+24,ctrl,\x0e,n
+25,ctrl,\r,m
