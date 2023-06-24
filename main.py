@@ -132,12 +132,21 @@ class ObjectFinderFrame(customtkinter.CTkFrame):
                                         padx=(50 + (self.width - (self.left_offset + self.right_offset)) / 2, 0),
                                         pady=(0, self.height - 5 * self.height / 6), sticky="w")
 
+        # Checkbox - working with object finder
+        self.object_finder_checkbox = customtkinter.CTkCheckBox(self.master, text="Working with object finder",
+                                                                width=50,
+                                                                command=self.__object_finder_checkbox_callback,
+                                                                onvalue=1, offvalue=0, bg_color=self.bg_color,
+                                                                height=self.height / 18, hover_color="gray20")
+        self.object_finder_checkbox.grid(row=0, column=1, padx=(self.left_offset, 0), pady=(0, 0),
+                                         sticky="w")
+
         # Option menu - picking the file with objects' locations
         self.objects_loc_label = customtkinter.CTkLabel(self.master, text="Pick the list of objects:",
                                                         fg_color=self.bg_color, bg_color=self.bg_color,
                                                         width=self.width / 3, height=self.height / 18)
         self.objects_loc_label.grid(row=0, column=1, padx=(self.left_offset, 0),
-                                    pady=(0, 0), sticky="w")
+                                    pady=(self.height / 6, 0), sticky="w")
         self.option_menu_objects_loc = customtkinter.CTkOptionMenu(self.master, values=self.locations_list,
                                                                    width=2 * self.width / 3, state="disabled",
                                                                    height=self.height / 18,
@@ -146,13 +155,14 @@ class ObjectFinderFrame(customtkinter.CTkFrame):
                                                                    bg_color=self.bg_color)
 
         self.option_menu_objects_loc.grid(row=0, column=1, padx=(self.left_offset, 0),
-                                          pady=(0.6 * self.height / 6, 0), sticky="w")
+                                          pady=(1.6 * self.height / 6, 0), sticky="w")
         self.insight_button4 = customtkinter.CTkButton(self.master, text="Open", width=self.width / 4, state="disabled",
                                                        height=self.height / 18, bg_color=self.bg_color,
                                                        command=self.__insight_callback4,
                                                        fg_color=self.disabled_widget_color)
         self.insight_button4.grid(row=0, column=1, padx=(10 + 2 * self.width / 3, 0),
-                                  pady=(0.6 * self.height / 6, 0), sticky="w")
+                                  pady=(1.6 * self.height / 6, 0), sticky="w")
+
 
         # Button - start macro with object finder
         self.start_macro_button = customtkinter.CTkButton(self.master, text="Start", width=self.width / 2,
@@ -201,6 +211,9 @@ class ObjectFinderFrame(customtkinter.CTkFrame):
                                                       text="Objects' locations (X, Y) will be stored in the 'locations' directory.\n"
                                                            "If filename is not specified, default filename will be used. Also the \n"
                                                            "'.png' file with found objects is generated.")
+        # Tooltip - Working with object finder checkbox
+        self.object_finder_checkbox_tooltip = Hovertip(self.object_finder_checkbox,
+                                                       text="Enables macro execution with object finder.")
 
         # Tooltips - Option menus
         self.option_menu_objects_loc_tooltip = Hovertip(self.option_menu_objects_loc,
@@ -280,6 +293,14 @@ class ObjectFinderFrame(customtkinter.CTkFrame):
         self.insight_button4.configure(state="normal" if visible else "disabled",
                                        fg_color=self.widget_color if visible else self.disabled_widget_color)
 
+    #Callback - object finder checkbox
+    def __object_finder_checkbox_callback(self):
+        self.master.macro_frame.run_macro_button.configure(state="disabled" if (self.object_finder_checkbox.get() or
+                                                                                self.master.macro_frame.offset_macro_checkbox.get()) else "normal")
+
+        self.master.finder = self.object_finder_checkbox.get()
+        self.show_objects_loc_list(self.object_finder_checkbox.get())
+
     # Function - enabling the start button with objects' locations
     def show_start_button(self, value):
         if self.master.finder and self.option_menu_objects_loc.get() != "---":
@@ -297,9 +318,9 @@ class ObjectFinderFrame(customtkinter.CTkFrame):
         self.option_menu_object3.configure(values=self.images_list)
         self.option_menu_objects_loc.configure(values=self.locations_list)
 
-    # Function - validates the user's input in the entry
     def validate(self, action, index, value_if_allowed,
-                       prior_value, text, validation_type, trigger_type, widget_name):
+                 prior_value, text, validation_type, trigger_type, widget_name):
+        """Used for validating user's input in entry"""
         if value_if_allowed:
             try:
                 float(value_if_allowed)
@@ -309,6 +330,8 @@ class ObjectFinderFrame(customtkinter.CTkFrame):
                     return False
             except ValueError:
                 return False
+        elif len(value_if_allowed) == 0:
+            return True
         else:
             return False
 
@@ -407,29 +430,59 @@ class MacroFrame(customtkinter.CTkFrame):
         self.macro_button_label = customtkinter.CTkLabel(self.master, text="Trigger button:", bg_color=self.bg_color,
                                                          width=self.width / 3, height=self.height / 18)
         self.macro_button_label.grid(row=0, column=0, padx=(self.left_offset, 0),
-                                     pady=(0, self.height - 5.5 * self.height / 6),
+                                     pady=(0, self.height - 5.0 * self.height / 6),
                                      sticky="w")
         self.hotkey_window = customtkinter.CTkLabel(self.master, text=self.hotkey, width=self.width / 3 - 10,
                                                     height=self.height / 18, bg_color=self.bg_color,
                                                     fg_color=self.bg_color)
         self.hotkey_window.grid(row=0, column=0, padx=(self.left_offset + self.width / 3, 0),
-                                pady=(0, self.height - 5.5 * self.height / 6),
+                                pady=(0, self.height - 5.0 * self.height / 6),
                                 sticky="w")
         self.macro_hotkey_register = customtkinter.CTkButton(self.master, text="Register", width=self.width / 4,
                                                              height=self.height / 18, fg_color=self.widget_color,
                                                              command=self.__macro_hotkey_callback,
                                                              bg_color=self.bg_color)
         self.macro_hotkey_register.grid(row=0, column=0, padx=(20 + 2 * self.width / 3, 0),
-                                        pady=(0, self.height - 5.5 * self.height / 6),
+                                        pady=(0, self.height - 5.0 * self.height / 6),
                                         sticky="w")
 
-        # Checkbox - working with object finder
-        self.object_finder_checkbox = customtkinter.CTkCheckBox(self.master, text="Working with object finder",
-                                                                width=50, command=self.__object_finder_checkbox_callback,
-                                                                onvalue=1, offvalue=0, bg_color=self.bg_color,
-                                                                height=self.height / 18, hover_color="gray20")
-        self.object_finder_checkbox.grid(row=0, column=0, padx=(20, 0), pady=(1*self.height/6, 0),
-                                         sticky="w")
+        # Checkbox - counter
+        vcmd = (self.register(self.validate),
+                '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
+        self.counter_checkbox = customtkinter.CTkCheckBox(self.master, text="Counter", width=self.width / 3,
+                                                          height=self.height / 18,
+                                                          onvalue=1, offvalue=0, bg_color=self.bg_color,
+                                                          command=self.__counter_callback,
+                                                          hover_color="gray20")
+
+        self.counter_checkbox.grid(row=0, column=0, padx=(self.left_offset, 0), pady=(self.height / 6, 0),
+                                   sticky="w")
+
+        # Counter - entries
+
+        self.counter_label1 = customtkinter.CTkLabel(self.master, text="Start value", fg_color=self.bg_color,
+                                                     width=self.width / 6, height=self.height / 18,
+                                                     bg_color=self.bg_color)
+        self.counter_label1.grid(row=0, column=0, padx=(1.2 * self.width / 3, 0), pady=(0.5 * self.height / 6, 0),
+                                 sticky="w")
+        self.counter_entry1 = customtkinter.CTkEntry(self.master, width=self.width / 6, height=self.height / 18,
+                                                     border_color=self.widget_color, bg_color=self.bg_color,
+                                                     validate='key', validatecommand=vcmd, state="disabled")
+        self.counter_entry1.insert(0, 1)
+        self.counter_entry1.grid(row=0, column=0, padx=(self.width / 3 + 25, 0), pady=(1.1 * self.height / 6, 0),
+                                 sticky="w")
+        self.counter_label2 = customtkinter.CTkLabel(self.master, text="Addend", fg_color=self.bg_color,
+                                                     width=self.width / 6, height=self.height / 18,
+                                                     bg_color=self.bg_color)
+        self.counter_label2.grid(row=0, column=0, padx=(2 * self.width / 3 + 5, 0), pady=(0.5 * self.height / 6, 0),
+                                 sticky="w")
+        self.counter_entry2 = customtkinter.CTkEntry(self.master, width=self.width / 6, height=self.height / 18,
+                                                     border_color=self.widget_color, bg_color=self.bg_color,
+                                                     validate='key', validatecommand=vcmd, state="disabled")
+        self.counter_entry2.insert(0, 1)
+        self.counter_entry2.grid(row=0, column=0, padx=(1.8 * self.width / 3 + 25, 0), pady=(1.1 * self.height / 6, 0),
+                                 sticky="w")
+
 
         # Checkbox - macro working with offset
         self.offset_macro_checkbox = customtkinter.CTkCheckBox(self.master, text="Working with offset", width=50,
@@ -486,8 +539,7 @@ class MacroFrame(customtkinter.CTkFrame):
         # Tooltip - Macro Generator Button
         self.generate_macro_button_tooltip = Hovertip(self.generate_macro_button,
                                                      text="Generates macro in a file specified on the left.\n"
-                                                          "If name is not specified, defalut filename is used\n"
-                                                          "More info in the readme file")
+                                                          "If name is not specified, defalut filename is used")
 
         # Tooltips - Option menus
         self.option_menu1_tooltip = Hovertip(self.option_menu_macro1,
@@ -508,25 +560,28 @@ class MacroFrame(customtkinter.CTkFrame):
                                                             "by a 'Listen' button. To stop listening for user input press esc.\n"
                                                             "Also esc button cannot be used as a key for macro execution")
 
-        # Tooltip - Working with object finder checkbox
-        self.object_finder_checkbox_tooltip = Hovertip(self.object_finder_checkbox,
-                                                      text="Enables macro execution with object finder.\n"
-                                                           "More info in readme file")
+        # Tooltip - Counter checkbox
+        self.counter_checkbox_tooltip = Hovertip(self.counter_checkbox,
+                                                      text="Enables counter - it is incremented by the value in the "
+                                                           "'addend' entry at the end of macros' execution process")
+
+        self.counter_entry1_tooltip = Hovertip(self.counter_entry1,
+                                                 text="Start value of the counter")
+
+        self.counter_entry2_tooltip = Hovertip(self.counter_entry2,
+                                               text="Value that is added to counter at the end of every cycle")
 
         # Tooltip - Working with offset checkbox
         self.offset_macro_checkbox_tooltip = Hovertip(self.offset_macro_checkbox,
-                                                       text="Enables macro execution with object finder.\n"
-                                                            "More info in readme file")
+                                                       text="Enables macro execution with object finder.")
 
         # Tooltip - Repeatable checkbox
         self.repeats_checkbox_tooltip = Hovertip(self.repeats_checkbox,
-                                                      text="Enables the option to specify the macro's repeats.\n"
-                                                           "More info in readme file")
+                                                      text="Enables the option to specify the macro's repeats.")
 
         # Tooltip - Pause Entry
         self.pause_entry_tooltip = Hovertip(self.pause_entry,
-                                                 text="Specifies the pause between every step.\n"
-                                                      "More info in readme file")
+                                                 text="Specifies the pause between every step.")
 
         # Tooltip - Run Button
         self.run_macro_button_tooltip = Hovertip(self.run_macro_button,
@@ -609,14 +664,18 @@ class MacroFrame(customtkinter.CTkFrame):
     def __object_finder_checkbox_callback(self):
         self.run_macro_button.configure(state="disabled" if (self.object_finder_checkbox.get() or
                                                              self.offset_macro_checkbox.get()) else "normal")
+
         self.master.finder = self.object_finder_checkbox.get()
         self.master.object_finder_frame.show_objects_loc_list(self.object_finder_checkbox.get())
 
     # Callback - offset_macro_checkbox - disables the RUN button, when checkbox returns 1
     def __offset_callback(self):
-        self.run_macro_button.configure(state="disabled" if (self.object_finder_checkbox.get() or
+        self.run_macro_button.configure(state="disabled" if (self.master.object_finder_frame.object_finder_checkbox.get() or
                                                              self.offset_macro_checkbox.get()) else "normal")
 
+    def __counter_callback(self):
+        self.counter_entry1.configure(state="normal" if self.counter_checkbox.get() else "disabled")
+        self.counter_entry2.configure(state="normal" if self.counter_checkbox.get() else "disabled")
     # Comment
 
     def __listen_macro_callback(self):
@@ -681,15 +740,17 @@ class MacroCreator(customtkinter.CTk):
         self.active_macros = ["---"]*3
         self.objects = []
         self.finder = False
+        self.counter_start_value = 0
+        self.counter_addend = 0
+        self.counter = 0
 
-
+        # Objects
         self.macro_frame = MacroFrame(self, "Macro")
         self.macro_frame.grid(row=0, column=0, padx=10, pady=(10, 10), sticky="nsew")
         self.object_finder_frame = ObjectFinderFrame(self, "Object Finder")
         self.object_finder_frame.grid(row=0, column=1, padx=(0, 10), pady=(10, 10), sticky="nsew")
         self.resizable(0, 0)
-        # self.button = customtkinter.CTkButton(self, text="my button", command=self.button_callback)
-        # self.button.grid(row=3, column=0, padx=10, pady=10, sticky="ew", columnspan=2)
+
 
     # Iconify window
     def set_window_size(self):
@@ -721,6 +782,18 @@ class MacroCreator(customtkinter.CTk):
 
     def run_macro_for_objects(self):
         """"Exetcutes macro for specified conditions for every object found"""
+
+        self.counter_start_value = float(
+            self.macro_frame.counter_entry1.get()) if self.macro_frame.counter_checkbox.get() else 0
+        self.counter_addend = float(
+            self.macro_frame.counter_entry2.get()) if self.macro_frame.counter_checkbox.get() else 0
+
+        self.counter_start_value = int(self.counter_start_value) if self.counter_start_value.is_integer() else self.counter_start_value
+        self.counter_addend = int(self.counter_addend) if self.counter_addend.is_integer() else self.counter_addend
+
+
+        self.counter = self.counter_start_value
+
         objects = zip(self.objects['X'].to_list(), self.objects['Y'].to_list())
         for obj in objects:
             for macro in self.active_macros:
@@ -729,8 +802,9 @@ class MacroCreator(customtkinter.CTk):
                                                    relative=self.macro_frame.offset_macro_checkbox.get(),
                                                    pause=float(self.macro_frame.pause_entry.get()) if
                                                    self.macro_frame.pause_entry.get()[-1] != "." else 0.15,
-                                                   finder=self.finder, object_loc=obj)
-
+                                                   finder=self.finder, object_loc=obj, counter=self.counter)
+            self.counter += self.counter_addend
+        self.counter = self.counter_start_value
 
 # python -m PyInstaller Model\Macro_builder.py
 if __name__ == "__main__":

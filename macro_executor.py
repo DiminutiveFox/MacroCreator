@@ -1,6 +1,7 @@
 import time
 import pandas as pd
 from pynput import mouse, keyboard
+from pynput.keyboard import Key
 from pynput.mouse import Button
 
 class MacroReader:
@@ -9,7 +10,7 @@ class MacroReader:
         self.mouse_controller = mouse.Controller()
         self.keyboard_controller = keyboard.Controller()
 
-    def macro_reader(self, key_database_name, object_loc=[0, 0], finder=False, relative=False, pause=0.15):
+    def macro_reader(self, key_database_name, object_loc=[0, 0], finder=False, relative=False, pause=0.15, counter=0):
 
         key_database = pd.read_csv(key_database_name) if relative == False else \
             self.mouse_loc_calc(key_database_name, self.mouse_controller.position if not finder
@@ -58,7 +59,7 @@ class MacroReader:
                 # If we clicked ctrl we assume that we performed a hotkey procedure during macro
                 # There is special key for every crtl hotkey in key dictionary and in next elif we look for it
                 # Here we just skip this line and click nothing
-                if key == 'Key.ctrl_l' or len(key) > 1:
+                if key == 'Key.ctrl_l' or key == 'Key.shift':
                     continue
                 # If key is in key dictionary, then perform hotkey eg ctrl+c
                 elif key in self.hotkey_database['Special Key'].values:
@@ -66,17 +67,20 @@ class MacroReader:
                     with self.keyboard_controller.pressed(keyboard.Key.ctrl):
                         self.keyboard_controller.press(self.hotkey_database.loc[index, 'Key'])
                 # If key is just an ordinary key eg 'k', then click k
+                elif len(key) > 1:
+                    self.keyboard_controller.press(eval(key))
+                    self.keyboard_controller.release(eval(key))
+                elif key == '$':
+                    self.keyboard_controller.type(key_database[n, 'X'])
+                elif key == '#':
+                    self.keyboard_controller.type(str(counter))
                 else:
-                    if key == '$':
-                        self.keyboard_controller.type(key_database.loc[n, 'X'])
-                    else:
-                        self.keyboard_controller.press(key)
-                        self.keyboard_controller.release(key)
+                    self.keyboard_controller.press(key)
+                    self.keyboard_controller.release(key)
 
     def mouse_loc_calc(self, key_database_name, click_loc):
         key_database = pd.read_csv(key_database_name)
         previous_click_loc = []
-        previous_updated_click_loc = []
         mouse_clicks = 0
         for n in range(len(key_database.index)):
             if key_database.loc[n, 'Device'] == 'mouse':
