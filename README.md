@@ -26,4 +26,3 @@ will be found; the higher the value, the more false positives.
 
 Files are stored in a 'locations' directory. Application also creates and shows a picture with object that were found - objects are indicated by green squares. User can validate and play with accuracy coefficient to improve the results. However the file cannot be picked in the drop-down menu unless the 'Working with object finder' checkbox in Macro Creator area is picked. 
 Start button is enabled when correct file is picked in drop-down menu. Also 'Working with offset' and "Repeatable' checkboxes are applied here. 
-# MacroCreator
